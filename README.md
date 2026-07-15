@@ -1,4 +1,3 @@
-# Align-Don-t-Blend
 
 <div align="center">
 
