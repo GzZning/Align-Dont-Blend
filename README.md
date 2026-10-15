@@ -12,21 +12,13 @@ This repository is the official implementation of "Align, Don't Blend: Orthogona
 
 ### VLM branch
 
-The semantic preference dataset ([Hugging Face](https://huggingface.co/datasets/Gaffeyzz/AlignGemini-Semantic-Preference-10K), [ModelScope](https://www.modelscope.cn/datasets/GaffeyGao/AlignGemini-Semantic-Preference-10K)) contains 5,000 Unsplash real images, 5,000 semantically implausible Echo-4o images, and their DPO preference records. We recommend ms-swift 3.10.x. `train_vlm.sh` uses Qwen2.5-VL-7B with LoRA rank 16 and alpha 32, learning rate `1e-6`, global batch size 8, DPO coefficient `0.05`, and one epoch:
+The semantic preference dataset ([Hugging Face](https://huggingface.co/datasets/Gaffeyzz/AlignGemini-Semantic-Preference-10K), [ModelScope](https://www.modelscope.cn/datasets/GaffeyGao/AlignGemini-Semantic-Preference-10K)) contains 5,000 Unsplash real images, 5,000 semantically implausible Echo-4o images, and their DPO preference records. We recommend ms-swift 3.10.x. The provided script is configured for one training epoch:
 
 ```bash
 VLM_MODEL=/path/to/Qwen2.5-VL-7B-Instruct \
 OUTPUT_DIR=/path/to/output \
 bash train_vlm.sh
 ```
-
-### Expert branch
-
-The pixel-artifact expert follows [Dual Data Alignment](https://github.com/roy-ch/Dual-Data-Alignment). Its [training implementation](https://github.com/roy-ch/Dual-Data-Alignment/tree/main/Training) and [training data](https://huggingface.co/datasets/Junwei-Xi/DDA-Training-Set) are available from the original project. Expert weights are not bundled.
-
-## New Challenging Benchmark
-
-AIGI-Now is available on [ModelScope](https://www.modelscope.cn/datasets/GaffeyGao/AIGI-Now) and [Hugging Face](https://huggingface.co/datasets/Gaffeyzz/AIGI-Now).
 
 ## Inference
 
@@ -39,6 +31,12 @@ python predict.py --input /path/to/images --output predictions.jsonl \
 ```
 
 `predictions.jsonl` contains each image path, final decision, expert decision, VLM decision, and VLM response. The expert is optional; without it, the VLM makes the final decision. See the [expert example](extra/pixel_artifact_expert/README.md#dda-example) to add one.
+
+## New Challenging Benchmark
+
+AIGI-Now is available on [ModelScope](https://www.modelscope.cn/datasets/GaffeyGao/AIGI-Now) and [Hugging Face](https://huggingface.co/datasets/Gaffeyzz/AIGI-Now).
+
+![AIGI-Now benchmark](assets/images/aigi-now2.jpg)
 
 ## Citing
 
