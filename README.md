@@ -16,7 +16,7 @@ The VLM branch uses 5,000 Unsplash real images and 5,000 semantically implausibl
 
 ### VLM branch
 
-We recommend ms-swift 3.10.x. The provided script is configured for one training epoch. Set `SEMANTIC_DATASET` to the downloaded preference records with local image paths; [prepare_data.py](tools/prepare_data.py) can resolve those paths.
+We recommend ms-swift 3.10.x. Set `SEMANTIC_DATASET` to the downloaded preference records with local image paths; [prepare_data.py](tools/prepare_data.py) can resolve those paths.
 
 ```bash
 VLM_MODEL=/path/to/Qwen2.5-VL-7B-Instruct \
