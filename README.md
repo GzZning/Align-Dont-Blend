@@ -1,33 +1,48 @@
-<div align="center">
+# AlignGemini
 
-<h1>Align, Don't Blend: Orthogonal Supervision Disentanglement As the Key to Generalizable AI-Generated Image Detection</h1>
+### Align, Don't Blend: Orthogonal Supervision Disentanglement As the Key to Generalizable AI-Generated Image Detection
 
-<p>
-  <a href="https://arxiv.org/abs/2512.06746"><img src="https://img.shields.io/badge/Paper-arXiv-b31b1b.svg" alt="arXiv"></a>
-  <a href="https://huggingface.co/datasets/Gaffeyzz/AIGI-Now"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Dataset-yellow" alt="Hugging Face"></a>
-  <a href="https://www.modelscope.cn/datasets/GaffeyGao/AIGI-Now"><img src="https://img.shields.io/badge/ModelScope-Dataset-blue" alt="ModelScope"></a>
-</p>
+[Project Page](https://github.com/GzZning/Align-Don-t-Blend) | [arXiv](https://arxiv.org/abs/2512.06746)
 
-</div>
+This repository is the official implementation of "Align, Don't Blend: Orthogonal Supervision Disentanglement As the Key to Generalizable AI-Generated Image Detection".
 
-This is the official repository for **AlignGemini**, a two-branch detector for generalizable AI-generated image detection. AlignGemini pairs a vision-language model trained with pure semantic supervision with a vision expert trained with pure pixel-artifact supervision. This orthogonal design improves average balanced accuracy by **9.5 points** across five in-the-wild benchmarks.
+![AlignGemini pipeline](assets/images/pipeline.jpg)
 
-We also introduce **AIGI-Now**, a diagnostic benchmark covering nine contemporary image generators with separate semantic and pixel-artifact evaluation subsets.
+## Training
 
-## Release Status
+### VLM branch
 
-- Paper: available
-- AIGI-Now test dataset: available
-- Training code and inference scripts: coming soon
+The semantic preference dataset ([Hugging Face](https://huggingface.co/datasets/Gaffeyzz/AlignGemini-Semantic-Preference-10K), [ModelScope](https://www.modelscope.cn/datasets/GaffeyGao/AlignGemini-Semantic-Preference-10K)) contains 5,000 Unsplash real images, 5,000 semantically implausible Echo-4o images, and their DPO preference records. We recommend ms-swift 3.10.x. `train_vlm.sh` uses Qwen2.5-VL-7B with LoRA rank 16 and alpha 32, learning rate `1e-6`, global batch size 8, DPO coefficient `0.05`, and one epoch:
 
-## Dataset
+```bash
+VLM_MODEL=/path/to/Qwen2.5-VL-7B-Instruct \
+OUTPUT_DIR=/path/to/output \
+bash train_vlm.sh
+```
 
-| Platform | Link |
-| --- | --- |
-| Hugging Face | [Gaffeyzz/AIGI-Now](https://huggingface.co/datasets/Gaffeyzz/AIGI-Now) |
-| ModelScope | [GaffeyGao/AIGI-Now](https://www.modelscope.cn/datasets/GaffeyGao/AIGI-Now) |
+### Expert branch
 
-## Citation
+The pixel-artifact expert follows [Dual Data Alignment](https://github.com/roy-ch/Dual-Data-Alignment). Its [training implementation](https://github.com/roy-ch/Dual-Data-Alignment/tree/main/Training) and [training data](https://huggingface.co/datasets/Junwei-Xi/DDA-Training-Set) are available from the original project. Expert weights are not bundled.
+
+## New Challenging Benchmark
+
+AIGI-Now is available on [ModelScope](https://www.modelscope.cn/datasets/GaffeyGao/AIGI-Now) and [Hugging Face](https://huggingface.co/datasets/Gaffeyzz/AIGI-Now).
+
+## Inference
+
+Run on an image folder:
+
+```bash
+python predict.py --input /path/to/images --output predictions.jsonl \
+  --vlm-adapter weights/vlm_adapter \
+  --vlm-base-model /path/to/Qwen2.5-VL-7B-Instruct
+```
+
+`predictions.jsonl` contains each image path, final decision, expert decision, VLM decision, and VLM response. The expert is optional; without it, the VLM makes the final decision. See the [expert example](extra/pixel_artifact_expert/README.md#dda-example) to add one.
+
+## Citing
+
+If you find this work useful, please cite the following works.
 
 ```bibtex
 @inproceedings{chen2026aligngemini,
@@ -35,5 +50,13 @@ We also introduce **AIGI-Now**, a diagnostic benchmark covering nine contemporar
   author={Chen, Ruoxin and Gao, Jiahui and Lin, Kaiqing and Zhang, Keyue and Zhao, Yandan and Guan, Isabel and Yao, Taiping and Ding, Shouhong},
   booktitle={Proceedings of the 34th ACM International Conference on Multimedia},
   year={2026}
+}
+
+@inproceedings{chen2025dual,
+  title={Dual Data Alignment Makes {AI}-Generated Image Detector Easier Generalizable},
+  author={Ruoxin Chen and Junwei Xi and Zhiyuan Yan and Ke-Yue Zhang and Shuang Wu and Jingyi Xie and Xu Chen and Lei Xu and Isabel Guan and Taiping Yao and Shouhong Ding},
+  booktitle={The Thirty-ninth Annual Conference on Neural Information Processing Systems},
+  year={2025},
+  url={https://openreview.net/forum?id=C39ShJwtD5}
 }
 ```
