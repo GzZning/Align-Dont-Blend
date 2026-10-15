@@ -1,5 +1,3 @@
-"""Combine complementary semantic and pixel-artifact evidence for inference."""
-
 from __future__ import annotations
 
 import argparse
@@ -65,7 +63,6 @@ def run_vlm(
 
 
 def run_expert(command: str, manifest: Path, workdir: Path) -> Path:
-    """Run an expert CLI that accepts --input and --output JSONL paths."""
     argv = shlex.split(command)
     if not argv:
         raise ValueError("--expert-command must not be empty")
