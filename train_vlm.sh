@@ -6,7 +6,7 @@ set -euo pipefail
 SEMANTIC_DATASET="${SEMANTIC_DATASET:-data/semantic_preference_train.jsonl}"
 NPROC_PER_NODE="${NPROC_PER_NODE:-8}"
 VLM_DTYPE="${VLM_DTYPE:-float16}"
-MAX_PIXELS="${MAX_PIXELS:-1003520}"  # Qwen2.5-VL: 1280 * 28 * 28
+MAX_PIXELS="${MAX_PIXELS:-1003520}"
 GLOBAL_BATCH_SIZE=8
 
 [[ -f "$SEMANTIC_DATASET" ]] || { echo "Missing dataset: $SEMANTIC_DATASET" >&2; exit 1; }
