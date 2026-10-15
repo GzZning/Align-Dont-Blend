@@ -1,5 +1,3 @@
-"""Map semantic-preference records to a local image root."""
-
 from __future__ import annotations
 
 import argparse
