@@ -1,5 +1,3 @@
-"""Input/output rules for the two-expert AlignGemini detector."""
-
 from __future__ import annotations
 
 import json
@@ -35,7 +33,6 @@ _IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff"}
 
 
 def parse_vlm_verdict(response: str) -> bool:
-    """Return True for synthetic; accept an explicit final verdict only."""
     matches = _ANSWER.findall(response)
     if len(matches) == 1:
         answer = " ".join(matches[0].split()).casefold()
@@ -60,7 +57,6 @@ def _image_path(value: str, base: Path) -> str:
 
 
 def read_inputs(manifest: Path) -> list[dict[str, str]]:
-    """Read images from a directory, path list, or single-image JSONL."""
     if manifest.is_dir():
         records = [
             {"id": str(index), "image": str(path.resolve())}
@@ -105,7 +101,6 @@ def read_inputs(manifest: Path) -> list[dict[str, str]]:
 
 
 def read_vlm_results(path: Path, records: list[dict[str, str]]) -> dict[str, str]:
-    """Match VLM JSONL responses to images, independent of row order."""
     expected = {row["image"] for row in records}
     responses: dict[str, str] = {}
     with path.open(encoding="utf-8") as stream:
@@ -141,7 +136,6 @@ def read_vlm_results(path: Path, records: list[dict[str, str]]) -> dict[str, str
 def read_expert_results(
     path: Path, records: list[dict[str, str]], threshold: float = 0.5,
 ) -> dict[str, tuple[bool, float | None]]:
-    """Read one fake label or fake probability for every input image."""
     if not 0.0 <= threshold <= 1.0:
         raise ValueError("Expert threshold must be in [0, 1]")
     expected = {row["image"] for row in records}
@@ -174,5 +168,4 @@ def read_expert_results(
 
 
 def fuse(vlm_fake: bool, expert_fake: bool) -> bool:
-    """An image is real only when both experts predict real."""
     return vlm_fake or expert_fake
