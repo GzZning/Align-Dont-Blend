@@ -8,14 +8,19 @@ This repository is the official implementation of "Align, Don't Blend: Orthogona
 
 ![AlignGemini pipeline](assets/images/pipeline.jpg)
 
+## Training data
+
+The VLM branch uses 5,000 Unsplash real images and 5,000 semantically implausible Echo-4o images with DPO preference records ([Hugging Face](https://huggingface.co/datasets/Gaffeyzz/AlignGemini-Semantic-Preference-10K), [ModelScope](https://www.modelscope.cn/datasets/GaffeyGao/AlignGemini-Semantic-Preference-10K)). The pixel-artifact expert uses COCO images and their VAE reconstructions; its [training data](https://huggingface.co/datasets/Junwei-Xi/DDA-Training-Set) are available from Dual Data Alignment.
+
 ## Training
 
 ### VLM branch
 
-The semantic preference dataset ([Hugging Face](https://huggingface.co/datasets/Gaffeyzz/AlignGemini-Semantic-Preference-10K), [ModelScope](https://www.modelscope.cn/datasets/GaffeyGao/AlignGemini-Semantic-Preference-10K)) contains 5,000 Unsplash real images, 5,000 semantically implausible Echo-4o images, and their DPO preference records. We recommend ms-swift 3.10.x. The provided script is configured for one training epoch:
+We recommend ms-swift 3.10.x. The provided script is configured for one training epoch. Set `SEMANTIC_DATASET` to the downloaded preference records with local image paths; [prepare_data.py](tools/prepare_data.py) can resolve those paths.
 
 ```bash
 VLM_MODEL=/path/to/Qwen2.5-VL-7B-Instruct \
+SEMANTIC_DATASET=/path/to/semantic_preference_train.jsonl \
 OUTPUT_DIR=/path/to/output \
 bash train_vlm.sh
 ```
