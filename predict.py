@@ -10,12 +10,12 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from core import (
+from aligngemini.core import (
     VLM_SYSTEM_PROMPT, VLM_USER_PROMPT, fuse, parse_vlm_verdict,
     read_expert_results, read_inputs, read_vlm_results,
 )
 
-DEFAULT_MAX_PIXELS = 1280 * 28 * 28  # Qwen2.5-VL image-token example
+DEFAULT_MAX_PIXELS = 1280 * 28 * 28
 
 
 def run_vlm(
@@ -96,7 +96,7 @@ def main() -> None:
     parser.add_argument("--swift-bin", default="swift")
     parser.add_argument("--tensor-parallel-size", type=int, default=1)
     parser.add_argument("--max-pixels", type=int, default=DEFAULT_MAX_PIXELS,
-                        help="Qwen2.5-VL image cap; default is 1280 * 28 * 28")
+                        help="Maximum image pixels; default is 1280 * 28 * 28")
     args = parser.parse_args()
     if args.tensor_parallel_size < 1:
         parser.error("Tensor parallel size must be positive")
@@ -135,7 +135,7 @@ def main() -> None:
     with args.output.open("x", encoding="utf-8") as stream:
         for row in records:
             vlm_fake = verdicts[row["image"]]
-            expert_fake, probability = (
+            expert_fake, _ = (
                 expert_results[row["image"]] if expert_results is not None else (None, None)
             )
             output = {
