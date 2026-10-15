@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+predictions.jsonl
+.ipynb_checkpoints/
+data/
+weights/
+reference/
+extra/legacy/
+extra/pixel_artifact_expert/checkpoint.pth
