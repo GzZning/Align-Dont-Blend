@@ -1,6 +1,6 @@
 # Expert interface
 
-AlignGemini accepts predictions from any pixel-artifact expert. For each input image, write one JSONL record with its image path and either `fake` (a boolean) or `fake_probability` (a number in `[0, 1]`, where larger means more likely synthetic). With probability inputs, the default decision threshold is `0.5`; boolean inputs are used directly. See the main [inference instructions](../../README.md#inference).
+The detector accepts predictions from any pixel-artifact expert. For each input image, write one JSONL record with its image path and either `fake` (a boolean) or `fake_probability` (a number in `[0, 1]`, where larger means more likely synthetic). With probability inputs, the default decision threshold is `0.5`; boolean inputs are used directly. See the main [inference instructions](../../README.md#inference).
 
 ## DDA example
 
