@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from aligngemini.core import (
+from detector.core import (
     VLM_SYSTEM_PROMPT, VLM_USER_PROMPT, fuse, parse_vlm_verdict,
     read_expert_results, read_inputs, read_vlm_results,
 )
@@ -107,7 +107,7 @@ def main() -> None:
         parser.error(f"Refusing to overwrite {args.output}")
 
     records = read_inputs(args.input.resolve())
-    with tempfile.TemporaryDirectory(prefix="aligngemini-") as temp:
+    with tempfile.TemporaryDirectory(prefix="detector-") as temp:
         result_path = args.vlm_results
         if result_path is None:
             result_path = run_vlm(
