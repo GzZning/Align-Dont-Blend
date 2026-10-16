@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from aligngemini.core import read_inputs
+from detector.core import read_inputs
 
 
 class PixelArtifactExpert:
