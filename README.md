@@ -1,16 +1,14 @@
-# AlignGemini
+# Align, Don't Blend: Orthogonal Supervision Disentanglement As the Key to Generalizable AI-Generated Image Detection
 
-### Align, Don't Blend: Orthogonal Supervision Disentanglement As the Key to Generalizable AI-Generated Image Detection
-
-[Project Page](https://github.com/GzZning/Align-Don-t-Blend) | [arXiv](https://arxiv.org/abs/2512.06746)
+[Project Page](https://github.com/GzZning/Align-Dont-Blend) | [arXiv](https://arxiv.org/abs/2512.06746)
 
 This repository is the official implementation of "Align, Don't Blend: Orthogonal Supervision Disentanglement As the Key to Generalizable AI-Generated Image Detection".
 
-![AlignGemini pipeline](assets/images/pipeline.jpg)
+![Method pipeline](assets/images/pipeline.jpg)
 
 ## Training data
 
-The VLM branch uses 5,000 Unsplash real images and 5,000 semantically implausible Echo-4o images with DPO preference records ([Hugging Face](https://huggingface.co/datasets/Gaffeyzz/AlignGemini-Semantic-Preference-10K), [ModelScope](https://www.modelscope.cn/datasets/GaffeyGao/AlignGemini-Semantic-Preference-10K)). The pixel-artifact expert uses COCO images and their VAE reconstructions; its [training data](https://huggingface.co/datasets/Junwei-Xi/DDA-Training-Set) are available from Dual Data Alignment.
+The VLM branch uses 5,000 Unsplash real images and 5,000 semantically implausible Echo-4o images with DPO preference records ([Hugging Face](https://huggingface.co/datasets/Gaffeyzz/Align-Dont-Blend-Semantic-Preference-10K)). The pixel-artifact expert uses COCO images and their VAE reconstructions; its [training data](https://huggingface.co/datasets/Junwei-Xi/DDA-Training-Set) are available from Dual Data Alignment.
 
 ## Training
 
@@ -48,7 +46,7 @@ AIGI-Now is available on [ModelScope](https://www.modelscope.cn/datasets/GaffeyG
 If you find this work useful, please cite the following works.
 
 ```bibtex
-@inproceedings{chen2026aligngemini,
+@inproceedings{chen2026aligndontblend,
   title={Align, Don't Blend: Orthogonal Supervision Disentanglement As the Key to Generalizable AI-Generated Image Detection},
   author={Chen, Ruoxin and Gao, Jiahui and Lin, Kaiqing and Zhang, Keyue and Zhao, Yandan and Guan, Isabel and Yao, Taiping and Ding, Shouhong},
   booktitle={Proceedings of the 34th ACM International Conference on Multimedia},
