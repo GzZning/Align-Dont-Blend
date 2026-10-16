@@ -4,17 +4,17 @@
 
 This repository is the official implementation of "Align, Don't Blend: Orthogonal Supervision Disentanglement As the Key to Generalizable AI-Generated Image Detection".
 
-![Method pipeline](assets/images/pipeline.jpg)
+![Method pipeline](assets/images/method_pipeline.jpg)
 
 ## Training data
 
-The VLM branch uses 5,000 Unsplash real images and 5,000 semantically implausible Echo-4o images with DPO preference records ([Hugging Face](https://huggingface.co/datasets/Gaffeyzz/Align-Dont-Blend-Semantic-Preference-10K)). The pixel-artifact expert uses COCO images and their VAE reconstructions; its [training data](https://huggingface.co/datasets/Junwei-Xi/DDA-Training-Set) are available from Dual Data Alignment.
+The VLM branch uses 5,000 Unsplash real images and 5,000 semantically implausible Echo-4o images with DPO preference records ([Hugging Face](https://huggingface.co/datasets/Gaffeyzz/Align-Dont-Blend-Semantic-Preference-10K)). The pixel-artifact expert uses COCO images and their VAE reconstructions; its training data are available from [Dual Data Alignment](https://huggingface.co/datasets/Junwei-Xi/DDA-Training-Set).
 
 ## Training
 
 ### VLM branch
 
-We recommend ms-swift 3.10.x. Set `SEMANTIC_DATASET` to the downloaded preference records with local image paths; [prepare_data.py](tools/prepare_data.py) can resolve those paths.
+We used ms-swift 3.10.x. Set `SEMANTIC_DATASET` to the downloaded preference records with local image paths; [prepare_data.py](tools/prepare_data.py) can resolve those paths.
 
 ```bash
 VLM_MODEL=/path/to/Qwen2.5-VL-7B-Instruct \
@@ -39,7 +39,7 @@ python predict.py --input /path/to/images --output predictions.jsonl \
 
 AIGI-Now is available on [ModelScope](https://www.modelscope.cn/datasets/GaffeyGao/AIGI-Now) and [Hugging Face](https://huggingface.co/datasets/Gaffeyzz/AIGI-Now).
 
-![AIGI-Now benchmark](assets/images/aigi-now2.jpg)
+![AIGI-Now benchmark overview](assets/images/aigi_now_benchmark_overview.jpg)
 
 ## Citing
 
