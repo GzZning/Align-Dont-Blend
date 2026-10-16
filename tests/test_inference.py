@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from aligngemini.core import (
+from detector.core import (
     VLM_SYSTEM_PROMPT, VLM_USER_PROMPT, fuse, parse_vlm_verdict,
     read_expert_results, read_inputs, read_vlm_results,
 )
