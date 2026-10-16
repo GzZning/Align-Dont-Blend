@@ -8,7 +8,7 @@ This repository is the official implementation of "Align, Don't Blend: Orthogona
 
 ## Training data
 
-The VLM branch uses 5,000 Unsplash real images and 5,000 semantically implausible Echo-4o images with DPO preference records ([Hugging Face](https://huggingface.co/datasets/Gaffeyzz/Align-Dont-Blend-Semantic-Preference-10K)). The pixel-artifact expert uses COCO images and their VAE reconstructions; its training data are available from [Dual Data Alignment](https://huggingface.co/datasets/Junwei-Xi/DDA-Training-Set).
+The VLM branch uses 5,000 Unsplash real images and 5,000 semantically implausible Echo-4o images with DPO preference records ([Hugging Face](https://huggingface.co/datasets/Gaffeyzz/Align-Dont-Blend-Semantic-Preference-10K)). The pixel-artifact expert uses COCO images and their VAE reconstructions ([ModelScope](https://www.modelscope.cn/datasets/JunweiXi/DDA-Training-Set) | [Hugging Face](https://huggingface.co/datasets/Junwei-Xi/DDA-Training-Set)).
 
 ## Training
 
