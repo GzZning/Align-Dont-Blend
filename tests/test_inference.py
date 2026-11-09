@@ -14,6 +14,28 @@ from predict import main, run_vlm
 
 
 class CoreTests(unittest.TestCase):
+    def test_pt_backend_does_not_require_vllm_arguments(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            adapter = root / "adapter"
+            adapter.mkdir()
+            (adapter / "adapter_config.json").write_text("{}")
+            base = root / "base"
+            base.mkdir()
+            (base / "config.json").write_text("{}")
+
+            def fake_swift(command, check, env):
+                self.assertEqual(command[command.index("--infer_backend") + 1], "pt")
+                self.assertEqual(command[command.index("--torch_dtype") + 1], "float16")
+                self.assertEqual(command[command.index("--attn_impl") + 1], "eager")
+                self.assertEqual(command[command.index("--device_map") + 1], "auto")
+                self.assertFalse(any(arg.startswith("--vllm_") for arg in command))
+                Path(command[command.index("--result_path") + 1]).touch()
+
+            with patch("predict.subprocess.run", side_effect=fake_swift):
+                run_vlm([], adapter, "swift", root, 1, base,
+                        infer_backend="pt", torch_dtype="float16", attn_impl="eager", device_map="auto")
+
     def test_vlm_manifest_uses_paper_prompt(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -59,6 +81,8 @@ class CoreTests(unittest.TestCase):
             result = root / "result.jsonl"
             for row in (
                 {"images": [str(image)], "response": "<answer>This is an authentic image.</answer>"},
+                {"images": [{"bytes": None, "path": str(image)}],
+                 "response": "<answer>This is an authentic image.</answer>"},
                 {"image": str(image), "branch_response": "<answer>This is an authentic image.</answer>"},
             ):
                 result.write_text(json.dumps(row) + "\n", encoding="utf-8")

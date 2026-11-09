@@ -115,6 +115,8 @@ def read_vlm_results(path: Path, records: list[dict[str, str]]) -> dict[str, str
                 image_value = images[0]
             else:
                 image_value = row.get("image")
+            if isinstance(image_value, dict):
+                image_value = image_value.get("path")
             if not isinstance(image_value, str):
                 raise ValueError(f"VLM result line {line_number}: missing image")
             image = str(Path(image_value).expanduser().resolve())

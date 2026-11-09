@@ -25,6 +25,8 @@ bash train_vlm.sh
 
 ## Inference
 
+Download the VLM adapter from [ModelScope](https://modelscope.cn/models/GaffeyGao/Align-Dont-Blend-VLM) or [Hugging Face](https://huggingface.co/Gaffeyzz/Align-Dont-Blend-VLM) into `weights/vlm_adapter/`. Download [Qwen2.5-VL-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct) separately as the base model.
+
 Run on an image folder:
 
 ```bash
@@ -34,6 +36,9 @@ python predict.py --input /path/to/images --output predictions.jsonl \
 ```
 
 `predictions.jsonl` contains each image path, final decision, expert decision, VLM decision, and VLM response. The expert is optional; without it, the VLM makes the final decision. See the [expert example](extra/pixel_artifact_expert/README.md#dda-example) to add one.
+
+For PyTorch inference without vLLM, add `--infer-backend pt`.
+On V100, add `--infer-backend pt --torch-dtype float32 --attn-impl eager --device-map auto`; tested on two 32 GB GPUs. FP16 produced invalid responses in this setup. PyTorch inference was tested with ms-swift 4.4.2 and datasets 4.8.4.
 
 ## New Challenging Benchmark
 

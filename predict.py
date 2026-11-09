@@ -19,6 +19,8 @@ DEFAULT_MAX_PIXELS = 1280 * 28 * 28
 def run_vlm(
     records: list[dict[str, str]], adapter: Path, swift_bin: str, workdir: Path,
     tensor_parallel_size: int, base_model: Path, max_pixels: int = DEFAULT_MAX_PIXELS,
+    infer_backend: str = "vllm", torch_dtype: str | None = None,
+    attn_impl: str | None = None, device_map: str | None = None,
 ) -> Path:
     if not (adapter / "adapter_config.json").is_file():
         raise FileNotFoundError(f"VLM adapter_config.json not found in {adapter}")
@@ -36,24 +38,34 @@ def run_vlm(
                 "images": [row["image"]],
             }
             stream.write(json.dumps(sample, ensure_ascii=False) + "\n")
-    subprocess.run(
-        [
-            swift_bin, "infer", "--adapters", str(adapter),
-            "--infer_backend", "vllm",
+    command = [
+        swift_bin, "infer", "--adapters", str(adapter),
+        "--infer_backend", infer_backend,
+        "--max_model_len", "8192",
+        "--max_pixels", str(max_pixels),
+        "--write_batch_size", "500",
+        "--temperature", "0",
+        "--max_new_tokens", "512",
+        "--val_dataset", str(dataset),
+        "--result_path", str(result),
+        "--seed", "42",
+        "--model", str(base_model),
+        "--load_args", "false",
+    ]
+    if infer_backend == "vllm":
+        command.extend([
             "--vllm_tensor_parallel_size", str(tensor_parallel_size),
             "--vllm_max_model_len", "8192",
-            "--max_model_len", "8192",
             "--vllm_gpu_memory_utilization", "0.85",
-            "--max_pixels", str(max_pixels),
-            "--write_batch_size", "500",
-            "--temperature", "0",
-            "--max_new_tokens", "512",
-            "--val_dataset", str(dataset),
-            "--result_path", str(result),
-            "--seed", "42",
-            "--model", str(base_model),
-            "--load_args", "false",
-        ],
+        ])
+    if torch_dtype is not None:
+        command.extend(["--torch_dtype", torch_dtype])
+    if attn_impl is not None:
+        command.extend(["--attn_impl", attn_impl])
+    if device_map is not None:
+        command.extend(["--device_map", device_map])
+    subprocess.run(
+        command,
         check=True,
         env={**os.environ, "MAX_PIXELS": str(max_pixels)},
     )
@@ -92,11 +104,20 @@ def main() -> None:
                         help="Base model directory; required with --vlm-adapter")
     parser.add_argument("--swift-bin", default="swift")
     parser.add_argument("--tensor-parallel-size", type=int, default=1)
+    parser.add_argument("--infer-backend", choices=("vllm", "pt"), default="vllm",
+                        help="Use pt for PyTorch inference without vLLM")
+    parser.add_argument("--torch-dtype", choices=("float16", "bfloat16", "float32"))
+    parser.add_argument("--attn-impl", choices=("eager", "sdpa", "flash_attn"))
+    parser.add_argument("--device-map", help="PyTorch model placement, e.g. auto for multiple GPUs")
     parser.add_argument("--max-pixels", type=int, default=DEFAULT_MAX_PIXELS,
                         help="Maximum image pixels; default is 1280 * 28 * 28")
     args = parser.parse_args()
     if args.tensor_parallel_size < 1:
         parser.error("Tensor parallel size must be positive")
+    if args.infer_backend == "pt" and args.tensor_parallel_size != 1:
+        parser.error("--tensor-parallel-size requires the vllm backend")
+    if args.device_map is not None and args.infer_backend != "pt":
+        parser.error("--device-map requires the pt backend")
     if args.max_pixels < 1:
         parser.error("--max-pixels must be positive")
     if args.vlm_adapter is not None and args.vlm_base_model is None:
@@ -114,6 +135,7 @@ def main() -> None:
                 records, args.vlm_adapter.resolve(), args.swift_bin,
                 Path(temp), args.tensor_parallel_size,
                 args.vlm_base_model.resolve(), args.max_pixels,
+                args.infer_backend, args.torch_dtype, args.attn_impl, args.device_map,
             )
         responses = read_vlm_results(result_path.resolve(), records)
         expert_results = None
