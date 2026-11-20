@@ -35,7 +35,7 @@ Run VLM + DDA on an image folder:
 python predict.py --input /path/to/images --output predictions.jsonl \
   --vlm-adapter weights/vlm_adapter \
   --vlm-base-model /path/to/Qwen2.5-VL-7B-Instruct \
-  --expert-command 'python extra/pixel_artifact_expert/examples/dda.py --checkpoint weights/DDA_ckpt.pth'
+  --expert-command 'python -m detector.expert --checkpoint weights/DDA_ckpt.pth'
 ```
 
 `predictions.jsonl` contains each image path, final decision, DDA decision, VLM decision, and VLM response.

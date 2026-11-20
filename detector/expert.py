@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import argparse
+import json
+from pathlib import Path
+
 import torch
 from torch import nn
 
+from .core import read_inputs
 from .third_party.dda.lora import apply_lora_to_linear_layers
 from .third_party.dinov2.models.vision_transformer import vit_large
 
@@ -26,3 +31,78 @@ class DDAExpert(nn.Module):
     def forward(self, images: torch.Tensor) -> torch.Tensor:
         features = self.base_model.model.forward_features(images)["x_norm_clstoken"]
         return self.base_model.fc(features)
+
+
+class PixelArtifactExpert:
+    def __init__(self, checkpoint: Path, device: str):
+        from torchvision import transforms
+
+        checkpoint = checkpoint.resolve()
+        if not checkpoint.is_file():
+            raise FileNotFoundError(checkpoint)
+        if device.startswith("cuda") and not torch.cuda.is_available():
+            raise RuntimeError("CUDA requested but unavailable")
+
+        with torch.device("meta"):
+            model = DDAExpert()
+        payload = torch.load(checkpoint, map_location="cpu", weights_only=True, mmap=True)
+        state = payload["model"] if isinstance(payload, dict) and "model" in payload else payload
+        model.load_state_dict(state, strict=True, assign=True)
+        self.model = model.to(device).eval()
+        self.device = device
+        self.torch = torch
+        self.transform = transforms.Compose([
+            transforms.CenterCrop(336),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=(0.48145466, 0.4578275, 0.40821073),
+                std=(0.26862954, 0.26130258, 0.27577711),
+            ),
+        ])
+
+    def probabilities(self, images: list[str], batch_size: int) -> list[float]:
+        from PIL import Image
+
+        scores: list[float] = []
+        for start in range(0, len(images), batch_size):
+            batch = []
+            for path in images[start:start + batch_size]:
+                with Image.open(path) as image:
+                    batch.append(self.transform(image.convert("RGB")))
+            tensor = self.torch.stack(batch).to(self.device)
+            with self.torch.inference_mode():
+                logits = self.model(tensor).flatten()
+                probabilities = logits.sigmoid().cpu().tolist()
+            if len(probabilities) != len(batch):
+                raise RuntimeError("Expert returned the wrong batch size")
+            scores.extend(probabilities)
+        return scores
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--checkpoint", type=Path, required=True)
+    parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--batch-size", type=int, default=8)
+    args = parser.parse_args()
+    if args.batch_size < 1:
+        parser.error("--batch-size must be positive")
+    if args.output.exists():
+        parser.error(f"Refusing to overwrite {args.output}")
+    records = read_inputs(args.input.resolve())
+    expert = PixelArtifactExpert(args.checkpoint, args.device)
+    probabilities = expert.probabilities(
+        [row["image"] for row in records], args.batch_size,
+    )
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    with args.output.open("x", encoding="utf-8") as stream:
+        for row, probability in zip(records, probabilities, strict=True):
+            stream.write(json.dumps({
+                "image": row["image"], "fake_probability": probability,
+            }) + "\n")
+
+
+if __name__ == "__main__":
+    main()

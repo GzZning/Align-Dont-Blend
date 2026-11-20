@@ -5,5 +5,3 @@ predictions.jsonl
 data/
 weights/
 reference/
-extra/legacy/
-extra/pixel_artifact_expert/checkpoint.pth
