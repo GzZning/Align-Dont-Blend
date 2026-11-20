@@ -1,3 +1,4 @@
+# Adapted from https://github.com/roy-ch/Dual-Data-Alignment (Apache-2.0).
 import math
 import torch
 import torch.nn as nn
