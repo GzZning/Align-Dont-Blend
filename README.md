@@ -25,7 +25,7 @@ bash train_vlm.sh
 
 ## Inference
 
-Tested PyTorch environment (Python 3.12):
+Inference dependencies (Python 3.12):
 
 ```bash
 pip install torch==2.6.0 torchvision==0.21.0 ms-swift==4.4.2 \
@@ -60,8 +60,6 @@ AIGI-Now is available on [ModelScope](https://www.modelscope.cn/datasets/GaffeyG
 The code and VLM adapter are licensed under [Apache-2.0](LICENSE).
 
 ## Citing
-
-If you find this work useful, please cite the following works.
 
 ```bibtex
 @inproceedings{chen2026aligndontblend,
