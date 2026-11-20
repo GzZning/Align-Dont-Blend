@@ -49,8 +49,6 @@ python predict.py --input /path/to/images --output predictions.jsonl \
 
 `predictions.jsonl` contains each image path, final decision, DDA decision, VLM decision, and VLM response.
 
-The command above was tested on two 32 GB V100 GPUs. FP16 produced invalid responses in this setup.
-
 ## New Challenging Benchmark
 
 AIGI-Now is available on [ModelScope](https://www.modelscope.cn/datasets/GaffeyGao/AIGI-Now) and [Hugging Face](https://huggingface.co/datasets/Gaffeyzz/AIGI-Now).
