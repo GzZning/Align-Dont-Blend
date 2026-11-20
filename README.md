@@ -27,7 +27,7 @@ bash train_vlm.sh
 
 Download the VLM adapter from [ModelScope](https://modelscope.cn/models/GaffeyGao/Align-Dont-Blend-VLM) or [Hugging Face](https://huggingface.co/Gaffeyzz/Align-Dont-Blend-VLM) into `weights/vlm_adapter/`. Download [Qwen2.5-VL-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct) separately as the base model.
 
-Download the [Expert](https://huggingface.co/Junwei-Xi/Dual-Data-Alignment/resolve/main/DDA_ckpt.pth) to `weights/DDA_ckpt.pth`. Prepare the [DDA inference source](https://github.com/roy-ch/Dual-Data-Alignment/tree/main/Inference) and [DINOv2 source](https://github.com/facebookresearch/dinov2).
+Download the [Expert](https://huggingface.co/Junwei-Xi/Dual-Data-Alignment/resolve/main/DDA_ckpt.pth) to `weights/DDA_ckpt.pth`.
 
 Run VLM + DDA on an image folder:
 
@@ -35,7 +35,7 @@ Run VLM + DDA on an image folder:
 python predict.py --input /path/to/images --output predictions.jsonl \
   --vlm-adapter weights/vlm_adapter \
   --vlm-base-model /path/to/Qwen2.5-VL-7B-Instruct \
-  --expert-command 'python extra/pixel_artifact_expert/examples/dda.py --expert-source /path/to/Dual-Data-Alignment/Inference --backbone-repo /path/to/dinov2 --checkpoint weights/DDA_ckpt.pth'
+  --expert-command 'python extra/pixel_artifact_expert/examples/dda.py --checkpoint weights/DDA_ckpt.pth'
 ```
 
 `predictions.jsonl` contains each image path, final decision, DDA decision, VLM decision, and VLM response.

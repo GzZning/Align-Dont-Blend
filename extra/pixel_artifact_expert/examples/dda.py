@@ -10,51 +10,22 @@ from detector.core import read_inputs
 
 
 class PixelArtifactExpert:
-    def __init__(self, source: Path, backbone_repo: Path, checkpoint: Path, device: str):
+    def __init__(self, checkpoint: Path, device: str):
         import torch
         from torchvision import transforms
+        from detector.expert import DDAExpert
 
-        source = source.resolve()
-        backbone_repo = backbone_repo.resolve()
         checkpoint = checkpoint.resolve()
-        if not (source / "models" / "dinov2_models_lora.py").is_file():
-            raise FileNotFoundError(f"Expert source not found: {source}")
-        if not (backbone_repo / "hubconf.py").is_file():
-            raise FileNotFoundError(f"Backbone source not found: {backbone_repo}")
         if not checkpoint.is_file():
             raise FileNotFoundError(checkpoint)
         if device.startswith("cuda") and not torch.cuda.is_available():
             raise RuntimeError("CUDA requested but unavailable")
 
-        sys.path.insert(0, str(source))
-        try:
-            from models.dinov2_models_lora import DINOv2ModelWithLoRA
-        finally:
-            sys.path.remove(str(source))
-
-        original_hub_load = torch.hub.load
-
-        def local_backbone(repo: str, name: str, *args, **kwargs):
-            if repo != "facebookresearch/dinov2" or name != "dinov2_vitl14":
-                raise ValueError(f"Unexpected backbone request: {repo}/{name}")
-            kwargs.pop("pretrained", None)
-            return original_hub_load(
-                str(backbone_repo), name, *args,
-                source="local", pretrained=False, **kwargs,
-            )
-
-        torch.hub.load = local_backbone
-        try:
-            model = DINOv2ModelWithLoRA(
-                name="dinov2_vitl14", lora_rank=8, lora_alpha=1,
-                lora_targets=None,
-            )
-        finally:
-            torch.hub.load = original_hub_load
-
+        with torch.device("meta"):
+            model = DDAExpert()
         payload = torch.load(checkpoint, map_location="cpu", weights_only=True, mmap=True)
         state = payload["model"] if isinstance(payload, dict) and "model" in payload else payload
-        model.load_state_dict(state, strict=True)
+        model.load_state_dict(state, strict=True, assign=True)
         self.model = model.to(device).eval()
         self.device = device
         self.torch = torch
@@ -90,8 +61,6 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--expert-source", type=Path, required=True)
-    parser.add_argument("--backbone-repo", type=Path, required=True)
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--batch-size", type=int, default=8)
@@ -101,9 +70,7 @@ def main() -> None:
     if args.output.exists():
         parser.error(f"Refusing to overwrite {args.output}")
     records = read_inputs(args.input.resolve())
-    expert = PixelArtifactExpert(
-        args.expert_source, args.backbone_repo, args.checkpoint, args.device,
-    )
+    expert = PixelArtifactExpert(args.checkpoint, args.device)
     probabilities = expert.probabilities(
         [row["image"] for row in records], args.batch_size,
     )
