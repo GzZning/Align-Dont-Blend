@@ -5,3 +5,5 @@ predictions.jsonl
 data/
 weights/
 reference/
+evaluations/
+.runtime_packages/
