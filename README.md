@@ -49,6 +49,10 @@ AIGI-Now is available on [ModelScope](https://www.modelscope.cn/datasets/GaffeyG
 
 ![AIGI-Now benchmark overview](assets/images/aigi_now_benchmark_overview.jpg)
 
+## License
+
+The code and VLM adapter are released under the [Apache License 2.0](LICENSE). Third-party components retain their original licenses.
+
 ## Citing
 
 If you find this work useful, please cite the following works.
