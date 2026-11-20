@@ -36,7 +36,7 @@ class CoreTests(unittest.TestCase):
                 run_vlm([], adapter, "swift", root, 1, base,
                         infer_backend="pt", torch_dtype="float16", attn_impl="eager", device_map="auto")
 
-    def test_vlm_manifest_uses_paper_prompt(self):
+    def test_vlm_manifest_uses_configured_prompt(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             adapter = root / "adapter"
