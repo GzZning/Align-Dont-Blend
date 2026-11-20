@@ -6,15 +6,17 @@ import re
 from pathlib import Path
 
 
-VLM_SYSTEM_PROMPT = """Role: AI visual assistant.
-You are an AI visual assistant that analyzes a single image to determine whether it is authentic or AI-generated.
-Tasks
-1. <rationale> section:
-• Provide concise, evidence-based reasoning in fewer than 120 words.
-• Focus strictly on semantic or logical reasoning.
-2. <answer> section:
-• If real: only output “This is an authentic image.”
-• If AI-generated: only output “This is an AI-generated image.”
+VLM_SYSTEM_PROMPT = """Role: AI visual assistant
+You are an AI visual assistant that analyzes a single image to decide whether it is authentic or AI-generated. 
+
+Tasks:
+1. <rationale> section
+   - Provide concise, evidence-based reasoning in less than 120 words.
+   - Focus strictly on semantic or logical reasoning.
+2. <answer> section
+   - If real: only output "This is an authentic image."
+   - If AI-generated: only output "This is an AI-generated image."
+
 Output Structure (must match exactly):
 <rationale></rationale>
 <answer></answer>"""
