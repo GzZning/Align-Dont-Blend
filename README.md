@@ -25,6 +25,12 @@ bash train_vlm.sh
 
 ## Inference
 
+Tested PyTorch environment (Python 3.12):
+
+```bash
+pip install torch==2.6.0 torchvision==0.21.0 ms-swift==4.4.2 transformers==5.12.1 peft==0.19.1 datasets==4.8.4 qwen-vl-utils==0.0.14
+```
+
 Download the VLM adapter from [ModelScope](https://modelscope.cn/models/GaffeyGao/Align-Dont-Blend-VLM) or [Hugging Face](https://huggingface.co/Gaffeyzz/Align-Dont-Blend-VLM) into `weights/vlm_adapter/`. Download [Qwen2.5-VL-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct) separately as the base model.
 
 Download the [Expert](https://huggingface.co/Junwei-Xi/Dual-Data-Alignment/resolve/main/DDA_ckpt.pth) to `weights/DDA_ckpt.pth`.
@@ -35,13 +41,13 @@ Run VLM + DDA on an image folder:
 python predict.py --input /path/to/images --output predictions.jsonl \
   --vlm-adapter weights/vlm_adapter \
   --vlm-base-model /path/to/Qwen2.5-VL-7B-Instruct \
+  --infer-backend pt --torch-dtype float32 --attn-impl eager --device-map auto \
   --expert-command 'python -m detector.expert --checkpoint weights/DDA_ckpt.pth'
 ```
 
 `predictions.jsonl` contains each image path, final decision, DDA decision, VLM decision, and VLM response.
 
-For PyTorch inference without vLLM, add `--infer-backend pt`.
-On V100, add `--infer-backend pt --torch-dtype float32 --attn-impl eager --device-map auto`; tested on two 32 GB GPUs. FP16 produced invalid responses in this setup. PyTorch inference was tested with ms-swift 4.4.2 and datasets 4.8.4.
+The command above was tested on two 32 GB V100 GPUs. FP16 produced invalid responses in this setup.
 
 ## New Challenging Benchmark
 
