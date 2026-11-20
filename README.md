@@ -27,15 +27,18 @@ bash train_vlm.sh
 
 Download the VLM adapter from [ModelScope](https://modelscope.cn/models/GaffeyGao/Align-Dont-Blend-VLM) or [Hugging Face](https://huggingface.co/Gaffeyzz/Align-Dont-Blend-VLM) into `weights/vlm_adapter/`. Download [Qwen2.5-VL-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct) separately as the base model.
 
-Run on an image folder:
+Download the [DDA checkpoint](https://huggingface.co/Junwei-Xi/Dual-Data-Alignment/resolve/main/DDA_ckpt.pth) to `weights/DDA_ckpt.pth`. Prepare the [DDA inference source](https://github.com/roy-ch/Dual-Data-Alignment/tree/main/Inference) and [DINOv2 source](https://github.com/facebookresearch/dinov2).
+
+Run VLM + DDA on an image folder:
 
 ```bash
 python predict.py --input /path/to/images --output predictions.jsonl \
   --vlm-adapter weights/vlm_adapter \
-  --vlm-base-model /path/to/Qwen2.5-VL-7B-Instruct
+  --vlm-base-model /path/to/Qwen2.5-VL-7B-Instruct \
+  --expert-command 'python extra/pixel_artifact_expert/examples/dda.py --expert-source /path/to/Dual-Data-Alignment/Inference --backbone-repo /path/to/dinov2 --checkpoint weights/DDA_ckpt.pth'
 ```
 
-`predictions.jsonl` contains each image path, final decision, expert decision, VLM decision, and VLM response. The expert is optional; without it, the VLM makes the final decision. See the [expert example](extra/pixel_artifact_expert/README.md#dda-example) to add one.
+`predictions.jsonl` contains each image path, final decision, DDA decision, VLM decision, and VLM response.
 
 For PyTorch inference without vLLM, add `--infer-backend pt`.
 On V100, add `--infer-backend pt --torch-dtype float32 --attn-impl eager --device-map auto`; tested on two 32 GB GPUs. FP16 produced invalid responses in this setup. PyTorch inference was tested with ms-swift 4.4.2 and datasets 4.8.4.
