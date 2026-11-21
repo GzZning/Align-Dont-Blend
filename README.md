@@ -35,19 +35,19 @@ pip install torch==2.6.0 torchvision==0.21.0 ms-swift==4.4.2 \
 
 Download the VLM adapter from [ModelScope](https://modelscope.cn/models/GaffeyGao/Align-Dont-Blend-VLM) or [Hugging Face](https://huggingface.co/Gaffeyzz/Align-Dont-Blend-VLM) into `weights/vlm_adapter/`. Download [Qwen2.5-VL-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct) into `weights/Qwen2.5-VL-7B-Instruct/`.
 
-Download the [Expert](https://huggingface.co/Junwei-Xi/Dual-Data-Alignment/resolve/main/DDA_ckpt.pth) to `weights/DDA_ckpt.pth`.
+Download the [Expert](https://huggingface.co/Junwei-Xi/Dual-Data-Alignment/resolve/main/DDA_ckpt.pth) to `weights/expert.pth`.
 
-Run VLM + DDA on an image folder:
+Run VLM + Expert on an image folder:
 
 ```bash
 python predict.py --input /path/to/images --output predictions.jsonl \
   --vlm-adapter weights/vlm_adapter \
   --vlm-base-model weights/Qwen2.5-VL-7B-Instruct \
   --infer-backend pt --torch-dtype float32 --attn-impl eager --device-map auto \
-  --expert-command 'python -m detector.expert --checkpoint weights/DDA_ckpt.pth'
+  --expert-command 'python -m detector.expert --checkpoint weights/expert.pth'
 ```
 
-`predictions.jsonl` contains each image path, final decision, DDA decision, VLM decision, and VLM response.
+`predictions.jsonl` contains each image path, final decision, Expert decision, VLM decision, and VLM response.
 
 ## New Challenging Benchmark
 

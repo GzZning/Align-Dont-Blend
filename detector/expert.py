@@ -8,11 +8,11 @@ import torch
 from torch import nn
 
 from .core import read_inputs
-from .third_party.dda.lora import apply_lora_to_linear_layers
+from .third_party.expert.lora import apply_lora_to_linear_layers
 from .third_party.dinov2.models.vision_transformer import vit_large
 
 
-class DDAExpert(nn.Module):
+class ExpertModel(nn.Module):
     def __init__(self):
         super().__init__()
         self.base_model = nn.Module()
@@ -44,7 +44,7 @@ class PixelArtifactExpert:
             raise RuntimeError("CUDA requested but unavailable")
 
         with torch.device("meta"):
-            model = DDAExpert()
+            model = ExpertModel()
         payload = torch.load(checkpoint, map_location="cpu", weights_only=True, mmap=True)
         state = payload["model"] if isinstance(payload, dict) and "model" in payload else payload
         model.load_state_dict(state, strict=True, assign=True)
