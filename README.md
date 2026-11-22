@@ -37,6 +37,8 @@ Download the VLM adapter from [ModelScope](https://modelscope.cn/models/GaffeyGa
 
 Download the [Expert](https://huggingface.co/Junwei-Xi/Dual-Data-Alignment/resolve/main/DDA_ckpt.pth) to `weights/expert.pth`.
 
+The VLM sends the [task prompt](detector/core.py) in the user message, directly after `<image>` with no added newline. The system message is `You are a helpful assistant.`
+
 Run VLM + Expert on an image folder:
 
 ```bash
@@ -48,6 +50,7 @@ python predict.py --input /path/to/images --output predictions.jsonl \
 ```
 
 `predictions.jsonl` contains each image path, final decision, Expert decision, VLM decision, and VLM response.
+If the VLM provides no explicit final verdict, `vlm_fake` is `null` and its full response is retained. With an Expert result, OR is `true` if either branch predicts Fake, `false` if both predict Real, and `null` otherwise.
 
 ## New Challenging Benchmark
 

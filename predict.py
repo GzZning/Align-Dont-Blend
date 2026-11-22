@@ -13,7 +13,7 @@ from detector.core import (
     read_expert_results, read_inputs, read_vlm_results,
 )
 
-DEFAULT_MAX_PIXELS = 1280 * 28 * 28
+DEFAULT_MAX_PIXELS = 1210000
 
 
 def run_vlm(
@@ -46,6 +46,8 @@ def run_vlm(
         "--write_batch_size", "500",
         "--temperature", "0",
         "--max_new_tokens", "512",
+        "--repetition_penalty", "1.0",
+        "--top_p", "1.0",
         "--val_dataset", str(dataset),
         "--result_path", str(result),
         "--seed", "42",
@@ -110,7 +112,7 @@ def main() -> None:
     parser.add_argument("--attn-impl", choices=("eager", "sdpa", "flash_attn"))
     parser.add_argument("--device-map", help="PyTorch model placement, e.g. auto for multiple GPUs")
     parser.add_argument("--max-pixels", type=int, default=DEFAULT_MAX_PIXELS,
-                        help="Maximum image pixels; default is 1280 * 28 * 28")
+                        help="Maximum image pixels; default is 1210000")
     args = parser.parse_args()
     if args.tensor_parallel_size < 1:
         parser.error("Tensor parallel size must be positive")
@@ -146,10 +148,12 @@ def main() -> None:
             expert_results = read_expert_results(
                 expert_path.resolve(), records, args.expert_threshold,
             )
-    verdicts = {
-        row["image"]: parse_vlm_verdict(responses[row["image"]])
-        for row in records
-    }
+    verdicts: dict[str, bool | None] = {}
+    for row in records:
+        try:
+            verdicts[row["image"]] = parse_vlm_verdict(responses[row["image"]])
+        except ValueError:
+            verdicts[row["image"]] = None
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("x", encoding="utf-8") as stream:
         for row in records:

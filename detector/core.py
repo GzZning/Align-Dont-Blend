@@ -6,7 +6,8 @@ import re
 from pathlib import Path
 
 
-VLM_SYSTEM_PROMPT = """Role: AI visual assistant
+VLM_SYSTEM_PROMPT = "You are a helpful assistant."
+VLM_USER_PROMPT = """<image>Role: AI visual assistant
 You are an AI visual assistant that analyzes a single image to decide whether it is authentic or AI-generated. 
 
 Tasks:
@@ -14,13 +15,12 @@ Tasks:
    - Provide concise, evidence-based reasoning in less than 120 words.
    - Focus strictly on semantic or logical reasoning.
 2. <answer> section
-   - If real: only output "This is an authentic image."
-   - If AI-generated: only output "This is an AI-generated image."
+   - If real: output "This is an authentic image."
+   - If AI-generated: output "This is an AI-generated image."
 
 Output Structure (must match exactly):
 <rationale></rationale>
 <answer></answer>"""
-VLM_USER_PROMPT = "<image>\nWhether the image is authentic or AI-generated?"
 
 _ANSWER = re.compile(r"<answer>\s*(.*?)\s*</answer>", re.IGNORECASE | re.DOTALL)
 _FINAL_SENTENCE = re.compile(
@@ -171,5 +171,9 @@ def read_expert_results(
     return results
 
 
-def fuse(vlm_fake: bool, expert_fake: bool) -> bool:
-    return vlm_fake or expert_fake
+def fuse(vlm_fake: bool | None, expert_fake: bool | None) -> bool | None:
+    if vlm_fake is True or expert_fake is True:
+        return True
+    if vlm_fake is None or expert_fake is None:
+        return None
+    return False

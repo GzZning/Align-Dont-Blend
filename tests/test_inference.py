@@ -50,8 +50,11 @@ class CoreTests(unittest.TestCase):
             def fake_swift(command, check, env):
                 self.assertTrue(check)
                 self.assertEqual(command[:4], ["swift", "infer", "--adapters", str(adapter)])
-                self.assertEqual(command[command.index("--max_pixels") + 1], "1003520")
-                self.assertEqual(env["MAX_PIXELS"], "1003520")
+                self.assertEqual(command[command.index("--max_pixels") + 1], "1210000")
+                self.assertEqual(env["MAX_PIXELS"], "1210000")
+                self.assertEqual(command[command.index("--temperature") + 1], "0")
+                self.assertEqual(command[command.index("--max_new_tokens") + 1], "512")
+                self.assertEqual(command[command.index("--repetition_penalty") + 1], "1.0")
                 Path(command[command.index("--result_path") + 1]).touch()
 
             with patch("predict.subprocess.run", side_effect=fake_swift):
@@ -61,6 +64,10 @@ class CoreTests(unittest.TestCase):
                 {"role": "system", "content": VLM_SYSTEM_PROMPT},
                 {"role": "user", "content": VLM_USER_PROMPT},
             ])
+            self.assertEqual(row["messages"][0]["content"], "You are a helpful assistant.")
+            self.assertTrue(row["messages"][1]["content"].startswith("<image>Role: AI visual assistant\n"))
+            self.assertNotIn("Whether the image", row["messages"][1]["content"])
+            self.assertNotIn("only output", row["messages"][1]["content"])
 
     def test_verdict_and_fusion(self):
         self.assertFalse(parse_vlm_verdict("<answer>This is an authentic image.</answer>"))
@@ -71,6 +78,37 @@ class CoreTests(unittest.TestCase):
         self.assertFalse(fuse(False, False))
         self.assertTrue(fuse(False, True))
         self.assertTrue(fuse(True, False))
+        self.assertTrue(fuse(None, True))
+        self.assertTrue(fuse(True, None))
+        self.assertIsNone(fuse(None, False))
+        self.assertIsNone(fuse(False, None))
+        self.assertIsNone(fuse(None, None))
+
+    def test_missing_final_answer_retains_response_and_expert_or(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            images = [root / f"{index}.jpg" for index in range(2)]
+            for image in images:
+                image.touch()
+            manifest = root / "images.txt"
+            manifest.write_text("\n".join(map(str, images)), encoding="utf-8")
+            response = "<rationale>The image is consistent with real-world photography."
+            vlm = root / "vlm.jsonl"
+            vlm.write_text("".join(json.dumps({"image": str(image), "response": response}) + "\n"
+                                   for image in images), encoding="utf-8")
+            expert = root / "expert.jsonl"
+            expert.write_text("".join(json.dumps({"image": str(image), "fake": fake}) + "\n"
+                                      for image, fake in zip(images, [False, True])), encoding="utf-8")
+            output = root / "predictions.jsonl"
+            with patch.object(sys, "argv", [
+                "predict.py", "--input", str(manifest), "--output", str(output),
+                "--vlm-results", str(vlm), "--expert-results", str(expert),
+            ]):
+                main()
+            rows = [json.loads(line) for line in output.read_text().splitlines()]
+            self.assertEqual([r["vlm_fake"] for r in rows], [None, None])
+            self.assertEqual([r["fake"] for r in rows], [None, True])
+            self.assertEqual([r["vlm_response"] for r in rows], [response, response])
 
     def test_vlm_result_formats(self):
         with tempfile.TemporaryDirectory() as temp:
