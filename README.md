@@ -50,7 +50,7 @@ python predict.py --input /path/to/images --output predictions.jsonl \
 ```
 
 `predictions.jsonl` contains each image path, final decision, Expert decision, VLM decision, and VLM response.
-If the VLM provides no explicit final verdict, `vlm_fake` is `null` and its full response is retained. With an Expert result, OR is `true` if either branch predicts Fake, `false` if both predict Real, and `null` otherwise.
+If no explicit VLM verdict can be parsed, the VLM defaults to Real (`vlm_fake: false`, `vlm_answer_parsed: false`). The original response is retained. With an Expert result, OR predicts Fake if either branch predicts Fake, and Real otherwise.
 
 ## New Challenging Benchmark
 

@@ -148,12 +148,15 @@ def main() -> None:
             expert_results = read_expert_results(
                 expert_path.resolve(), records, args.expert_threshold,
             )
-    verdicts: dict[str, bool | None] = {}
+    verdicts: dict[str, bool] = {}
+    parsed_answers: dict[str, bool] = {}
     for row in records:
         try:
             verdicts[row["image"]] = parse_vlm_verdict(responses[row["image"]])
+            parsed_answers[row["image"]] = True
         except ValueError:
-            verdicts[row["image"]] = None
+            verdicts[row["image"]] = False
+            parsed_answers[row["image"]] = False
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("x", encoding="utf-8") as stream:
         for row in records:
@@ -164,6 +167,7 @@ def main() -> None:
             output = {
                 "image": row["image"],
                 "vlm_fake": vlm_fake,
+                "vlm_answer_parsed": parsed_answers[row["image"]],
                 "expert_fake": expert_fake,
                 "fake": vlm_fake if expert_fake is None else fuse(vlm_fake, expert_fake),
                 "vlm_response": responses[row["image"]],

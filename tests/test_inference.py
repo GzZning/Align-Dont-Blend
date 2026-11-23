@@ -106,9 +106,41 @@ class CoreTests(unittest.TestCase):
             ]):
                 main()
             rows = [json.loads(line) for line in output.read_text().splitlines()]
-            self.assertEqual([r["vlm_fake"] for r in rows], [None, None])
-            self.assertEqual([r["fake"] for r in rows], [None, True])
+            self.assertEqual([r["vlm_fake"] for r in rows], [False, False])
+            self.assertEqual([r["vlm_answer_parsed"] for r in rows], [False, False])
+            self.assertEqual([r["fake"] for r in rows], [False, True])
             self.assertEqual([r["vlm_response"] for r in rows], [response, response])
+
+    def test_unparseable_vlm_only_outputs_default_to_real(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            responses = [
+                "",
+                "<rationale>The image has strong AI-generated characteristics.",
+                "<answer>fake</answer>",
+                "<answer>This is an authentic image.</answer><answer>This is an AI-generated image.</answer>",
+                "<answer>This is an authentic image.</answer>",
+                "<answer>This is an AI-generated image.</answer>",
+            ]
+            images = [root / f"{index}.jpg" for index in range(len(responses))]
+            for image in images:
+                image.touch()
+            manifest = root / "images.txt"
+            manifest.write_text("\n".join(map(str, images)), encoding="utf-8")
+            vlm = root / "vlm.jsonl"
+            vlm.write_text("".join(json.dumps({"image": str(image), "response": response}) + "\n"
+                                   for image, response in zip(images, responses)), encoding="utf-8")
+            output = root / "predictions.jsonl"
+            with patch.object(sys, "argv", [
+                "predict.py", "--input", str(manifest), "--output", str(output),
+                "--vlm-results", str(vlm),
+            ]):
+                main()
+            rows = [json.loads(line) for line in output.read_text().splitlines()]
+            self.assertEqual([r["vlm_fake"] for r in rows], [False, False, False, False, False, True])
+            self.assertEqual([r["fake"] for r in rows], [False, False, False, False, False, True])
+            self.assertEqual([r["vlm_answer_parsed"] for r in rows], [False, False, False, False, True, True])
+            self.assertEqual([r["vlm_response"] for r in rows], responses)
 
     def test_vlm_result_formats(self):
         with tempfile.TemporaryDirectory() as temp:
