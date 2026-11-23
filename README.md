@@ -39,6 +39,8 @@ Download the [Expert](https://huggingface.co/Junwei-Xi/Dual-Data-Alignment/resol
 
 The VLM sends the [task prompt](detector/core.py) in the user message, directly after `<image>` with no added newline. The system message is `You are a helpful assistant.`
 
+For GenImage and AIGCDetectBenchmark evaluation, apply `prepare_image(image, dataset, label)` from [jpeg96.py](tools/jpeg96.py) before inference. It converts images to RGB and applies JPEG96 only to Fake images (`label=1`), using an in-memory buffer; Real images (`label=0`) are not recompressed.
+
 Run VLM + Expert on an image folder:
 
 ```bash
